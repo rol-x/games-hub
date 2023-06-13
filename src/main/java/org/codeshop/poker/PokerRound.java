@@ -2,12 +2,15 @@ package org.codeshop.poker;
 
 import java.util.Comparator;
 import java.util.List;
+
+import org.codeshop.poker.card.Deck;
 import org.codeshop.poker.card.RankedCards;
+import org.codeshop.poker.card.Ranking;
 import org.codeshop.poker.player.Player;
 
 class PokerRound {
-  private List<Player> players;
-  private Deck deck;
+  private final List<Player> players;
+  private final Deck deck;
 
   public PokerRound(List<Player> players, Deck deck) {
     this.players = players;
@@ -24,19 +27,18 @@ class PokerRound {
   }
 
   public Player findWinner() {
-    var bestRanking =
-        players.stream()
-            .sorted(Comparator.comparing(o -> o.rankHand().getRanking()))
-            .toList()
-            .get(0)
-            .rankHand()
-            .getRanking();
+    var bestRanking = findWinningHand().getRanking();
     var contestingPlayers =
         players.stream()
             .filter(player -> player.rankHand().getRanking().equals(bestRanking))
             .toList();
     if (contestingPlayers.size() == 1) return contestingPlayers.get(0);
     System.out.println("# of contenders: " + contestingPlayers.size());
+    return findTopPlayerInTie(contestingPlayers, bestRanking);
+  }
+
+  private Player findTopPlayerInTie(List<Player> contestingPlayers, Ranking bestRanking) {
+
     return contestingPlayers.get(0);
   }
 
@@ -46,9 +48,8 @@ class PokerRound {
 
   public RankedCards findWinningHand() {
     return players.stream()
-        .sorted(Comparator.comparing(o -> o.rankHand().getRanking()))
-        .toList()
-        .get(0)
-        .rankHand();
+        .map(Player::rankHand)
+        .max(Comparator.comparing(RankedCards::getRanking))
+        .orElse(null);
   }
 }

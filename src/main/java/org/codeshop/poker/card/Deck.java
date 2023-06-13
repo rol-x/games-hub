@@ -1,11 +1,8 @@
-package org.codeshop.poker;
+package org.codeshop.poker.card;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import org.codeshop.poker.card.Card;
-import org.codeshop.poker.card.Rank;
-import org.codeshop.poker.card.Suit;
 
 public class Deck {
   private final LinkedList<Card> cards;

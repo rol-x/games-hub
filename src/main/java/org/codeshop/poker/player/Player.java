@@ -14,6 +14,7 @@ public abstract class Player {
   private final String name;
   private int money;
   private final Set<Card> hand = new HashSet<>();
+  private final PokerHandEvaluator evaluator = new PokerHandEvaluator();
 
   protected Player(String name) {
     this.name = name;
@@ -24,12 +25,7 @@ public abstract class Player {
   }
 
   public RankedCards rankHand() {
-    return new RankedCards(
-        Ranking.HIGH_CARD,
-        hand.stream()
-            .sorted(Comparator.comparingInt(o -> o.getRank().getValue()))
-            .toList()
-            .subList(0, 1));
+    return evaluator.evaluate(hand);
   }
 
   public void disposeHand() {

@@ -2,12 +2,11 @@ package org.codeshop.poker;
 
 import java.util.ArrayList;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import org.codeshop.poker.card.Deck;
 import org.codeshop.poker.player.ComputerPlayer;
 import org.codeshop.poker.player.HumanPlayer;
 import org.codeshop.poker.player.Player;
 
-@RequiredArgsConstructor
 public class Poker {
   private final List<Player> players = new ArrayList<>();
   private final Deck deck = Deck.shuffled();
