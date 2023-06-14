@@ -1,35 +1,31 @@
 package org.codeshop.poker.player;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.Getter;
 import org.codeshop.poker.card.Card;
-import org.codeshop.poker.card.RankedCards;
-import org.codeshop.poker.card.Ranking;
+import org.codeshop.poker.card.Hand;
 
 @Getter
 public abstract class Player {
 
   private final String name;
   private int money;
-  private final Set<Card> hand = new HashSet<>();
-  private final PokerHandEvaluator evaluator = new PokerHandEvaluator();
+  private Hand hand;
 
   protected Player(String name) {
     this.name = name;
+    this.hand = new Hand();
   }
 
   public void takeCard(Card card) {
     this.hand.add(card);
   }
 
-  public RankedCards rankHand() {
-    return evaluator.evaluate(hand);
+  public void rankHand() {
+    this.hand.rankCards();
   }
 
   public void disposeHand() {
-    this.hand.clear();
+    this.hand = new Hand();
   }
 
   public void lose(int lossAmount) {
@@ -47,8 +43,11 @@ public abstract class Player {
   @Override
   public String toString() {
     var result = new StringBuilder(name);
-    result.append(" [");
-    for (var card : hand) {
+    result.append("\t[");
+    for (var card : hand.getCardsInRank()) {
+      result.append(card).append(" ");
+    }
+    for (var card : hand.getOtherCards()) {
       result.append(card).append(" ");
     }
     result.deleteCharAt(result.length() - 1);

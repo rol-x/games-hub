@@ -2,54 +2,58 @@ package org.codeshop.poker;
 
 import java.util.Comparator;
 import java.util.List;
-
-import org.codeshop.poker.card.Deck;
-import org.codeshop.poker.card.RankedCards;
-import org.codeshop.poker.card.Ranking;
+import org.codeshop.poker.card.Dealer;
+import org.codeshop.poker.card.Hand;
 import org.codeshop.poker.player.Player;
 
 class PokerRound {
   private final List<Player> players;
-  private final Deck deck;
+  private final Dealer dealer;
+  private final Tiebreaker tiebreaker;
 
-  public PokerRound(List<Player> players, Deck deck) {
+  public PokerRound(List<Player> players) {
     this.players = players;
-    this.deck = deck;
+    this.dealer = new Dealer();
+    this.tiebreaker = new Tiebreaker();
   }
 
   public void dealHandToEachPlayer() {
     for (int i = 0; i < 5; i++) {
       for (var player : players) {
-        var card = deck.takeTopCard();
+        var card = dealer.dealCard();
         player.takeCard(card);
       }
     }
   }
 
-  public Player findWinner() {
-    var bestRanking = findWinningHand().getRanking();
-    var contestingPlayers =
-        players.stream()
-            .filter(player -> player.rankHand().getRanking().equals(bestRanking))
-            .toList();
-    if (contestingPlayers.size() == 1) return contestingPlayers.get(0);
-    System.out.println("# of contenders: " + contestingPlayers.size());
-    return findTopPlayerInTie(contestingPlayers, bestRanking);
+  public void rankEachHand() {
+    players.forEach(Player::rankHand);
   }
 
-  private Player findTopPlayerInTie(List<Player> contestingPlayers, Ranking bestRanking) {
+  public Hand findBestHand() {
+    return players.stream()
+        .map(Player::getHand)
+        .max(Comparator.comparing(Hand::getRanking))
+        .orElse(null);
+  }
 
-    return contestingPlayers.get(0);
+  public Player findWinningPlayer() {
+    var bestRanking = findBestHand().getRanking();
+    var contestingPlayers =
+        players.stream()
+            .filter(player -> player.getHand().getRanking().equals(bestRanking))
+            .toList();
+    if (contestingPlayers.size() == 1) return contestingPlayers.get(0);
+    System.out.printf("Tie between %d players%n", contestingPlayers.size());
+    return tiebreaker.findTopPlayerInTie(contestingPlayers, bestRanking);
   }
 
   public void disposePlayedCards() {
     players.forEach(Player::disposeHand);
   }
 
-  public RankedCards findWinningHand() {
-    return players.stream()
-        .map(Player::rankHand)
-        .max(Comparator.comparing(RankedCards::getRanking))
-        .orElse(null);
+  public void displayEachPlayersHand() {
+    players.forEach(
+        player -> System.out.printf("%s\t[%s]%n", player, player.getHand().getRanking()));
   }
 }

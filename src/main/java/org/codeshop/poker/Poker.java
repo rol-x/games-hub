@@ -2,28 +2,32 @@ package org.codeshop.poker;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.codeshop.poker.card.Deck;
 import org.codeshop.poker.player.ComputerPlayer;
 import org.codeshop.poker.player.HumanPlayer;
 import org.codeshop.poker.player.Player;
 
 public class Poker {
+  public static final int ROUNDS_LIMIT = 2;
   private final List<Player> players = new ArrayList<>();
-  private final Deck deck = Deck.shuffled();
 
   public void play() {
-    boolean alive = false;
+    boolean alive = true;
+    int roundCount = 1;
     do {
-      var round = new PokerRound(players, deck);
+      var round = new PokerRound(players);
       round.dealHandToEachPlayer();
-      var winningHand = round.findWinningHand();
+      round.rankEachHand();
+      round.displayEachPlayersHand();
+      var winningHand = round.findBestHand();
       System.out.println("Winning hand: " + winningHand);
 
-      var winner = round.findWinner();
+      var winner = round.findWinningPlayer();
       winner.win(100);
       System.out.println("Winner: " + winner);
       round.disposePlayedCards();
-      alive = !alive;
+      roundCount += 1;
+      if (roundCount > ROUNDS_LIMIT) alive = false;
+      System.out.println();
     } while (alive);
   }
 
@@ -36,9 +40,4 @@ public class Poker {
     var player = new ComputerPlayer(name);
     players.add(player);
   }
-
-  // removePlayer()
-  // ? giveMoney() ?
-  // ? takeMoney() ?
-  // play()
 }
