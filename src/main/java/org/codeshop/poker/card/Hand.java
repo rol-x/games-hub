@@ -19,21 +19,19 @@ public class Hand {
 
   public void rankCards() {
     var rankedHand = PokerHandEvaluator.evaluate(cards);
-    this.ranking = rankedHand.getRanking();
-    this.cardsInRank = rankedHand.getCardsInRank();
-    this.otherCards = rankedHand.getOtherCards();
+    this.ranking = rankedHand.ranking();
+    this.cardsInRank = rankedHand.cardsInRank();
+    this.otherCards = rankedHand.otherCards();
   }
 
   @Override
   public String toString() {
     var result = new StringBuilder(ranking.toString());
-    for (var card : cardsInRank) {
-      result.append(" ").append(card);
-    }
+    cardsInRank.forEach(card -> result.append(" ").append(card));
+    if (otherCards.isEmpty()) return result.toString();
+
     result.append(" |");
-    for (var card : otherCards) {
-      result.append(" ").append(card);
-    }
+    otherCards.forEach(card -> result.append(" ").append(card));
     return result.toString();
   }
 }
