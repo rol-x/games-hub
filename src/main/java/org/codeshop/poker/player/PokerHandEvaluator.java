@@ -1,5 +1,6 @@
 package org.codeshop.poker.player;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
@@ -31,7 +32,7 @@ public class PokerHandEvaluator {
     var flush = suitFrequencies.containsValue(5);
 
     if (straight && flush) {
-      if (getHighCard(hand).equals(Rank.ACE)) return evaluateRoyalFlush(hand);
+      if (getHighCardRank(hand).equals(Rank.ACE)) return evaluateRoyalFlush(hand);
       return evaluateStraightFlush(hand);
     }
     if (straight) return evaluateStraight(hand);
@@ -40,66 +41,73 @@ public class PokerHandEvaluator {
   }
 
   private static RankedHandDto evaluateRoyalFlush(Set<Card> hand) {
-    return new RankedHandDto(
-        Ranking.ROYAL_FLUSH,
-        List.of(),
-        hand.stream().sorted(Comparator.comparing(Card::getRank).reversed()).toList());
+    return new RankedHandDto(Ranking.ROYAL_FLUSH, hand.stream().toList(), List.of());
   }
 
   private static RankedHandDto evaluateStraightFlush(Set<Card> hand) {
-    return new RankedHandDto(
-        Ranking.STRAIGHT_FLUSH,
-        List.of(),
-        hand.stream().sorted(Comparator.comparing(Card::getRank).reversed()).toList());
+    return new RankedHandDto(Ranking.STRAIGHT_FLUSH, hand.stream().toList(), List.of());
   }
 
   private static RankedHandDto evaluateFourOfAKind(Set<Card> hand) {
+    var cardsInRank =
+        hand.stream()
+            .filter(
+                card -> {
+                  var ranksInHand = hand.stream().map(Card::getRank).toList();
+                  return Collections.frequency(ranksInHand, card.getRank()) == 4;
+                })
+            .toList();
     return new RankedHandDto(
-        Ranking.FOUR_OF_A_KIND,
-        List.of(),
-        hand.stream().sorted(Comparator.comparing(Card::getRank).reversed()).toList());
+        Ranking.FOUR_OF_A_KIND, cardsInRank, findCardsNotInRank(hand, cardsInRank));
   }
 
   private static RankedHandDto evaluateFullHouse(Set<Card> hand) {
-    return new RankedHandDto(
-        Ranking.FULL_HOUSE,
-        List.of(),
-        hand.stream().sorted(Comparator.comparing(Card::getRank).reversed()).toList());
+    return new RankedHandDto(Ranking.FULL_HOUSE, hand.stream().toList(), List.of());
   }
 
   private static RankedHandDto evaluateFlush(Set<Card> hand) {
-    return new RankedHandDto(
-        Ranking.FLUSH,
-        List.of(),
-        hand.stream().sorted(Comparator.comparing(Card::getRank).reversed()).toList());
+    return new RankedHandDto(Ranking.FLUSH, hand.stream().toList(), List.of());
   }
 
   private static RankedHandDto evaluateStraight(Set<Card> hand) {
-    return new RankedHandDto(
-        Ranking.STRAIGHT,
-        List.of(),
-        hand.stream().sorted(Comparator.comparing(Card::getRank).reversed()).toList());
+    return new RankedHandDto(Ranking.STRAIGHT, hand.stream().toList(), List.of());
   }
 
   private static RankedHandDto evaluateThreeOfAKind(Set<Card> hand) {
+    var cardsInRank =
+        hand.stream()
+            .filter(
+                card -> {
+                  var ranksInHand = hand.stream().map(Card::getRank).toList();
+                  return Collections.frequency(ranksInHand, card.getRank()) == 3;
+                })
+            .toList();
     return new RankedHandDto(
-        Ranking.THREE_OF_A_KIND,
-        List.of(),
-        hand.stream().sorted(Comparator.comparing(Card::getRank).reversed()).toList());
+        Ranking.THREE_OF_A_KIND, cardsInRank, findCardsNotInRank(hand, cardsInRank));
   }
 
   private static RankedHandDto evaluateTwoPairs(Set<Card> hand) {
-    return new RankedHandDto(
-        Ranking.TWO_PAIR,
-        List.of(),
-        hand.stream().sorted(Comparator.comparing(Card::getRank).reversed()).toList());
+    var cardsInRank =
+        hand.stream()
+            .filter(
+                card -> {
+                  var ranksInHand = hand.stream().map(Card::getRank).toList();
+                  return Collections.frequency(ranksInHand, card.getRank()) == 2;
+                })
+            .toList();
+    return new RankedHandDto(Ranking.TWO_PAIR, cardsInRank, findCardsNotInRank(hand, cardsInRank));
   }
 
   private static RankedHandDto evaluatePair(Set<Card> hand) {
-    return new RankedHandDto(
-        Ranking.PAIR,
-        List.of(),
-        hand.stream().sorted(Comparator.comparing(Card::getRank).reversed()).toList());
+    var cardsInRank =
+        hand.stream()
+            .filter(
+                card -> {
+                  var ranksInHand = hand.stream().map(Card::getRank).toList();
+                  return Collections.frequency(ranksInHand, card.getRank()) == 2;
+                })
+            .toList();
+    return new RankedHandDto(Ranking.PAIR, cardsInRank, findCardsNotInRank(hand, cardsInRank));
   }
 
   private static RankedHandDto evaluateHighCard(Set<Card> hand) {
@@ -113,13 +121,8 @@ public class PokerHandEvaluator {
             .toList());
   }
 
-  private static Rank getHighCard(Set<Card> hand) {
+  private static Rank getHighCardRank(Set<Card> hand) {
     return hand.stream().max(Comparator.comparing(Card::getRank)).orElseThrow().getRank();
-  }
-
-  private static boolean isStraight(Map<Rank, Integer> rankFrequencies) {
-    var ranks = rankFrequencies.keySet().stream().sorted().toList();
-    return ranks.get(4).getValue() - ranks.get(0).getValue() == 4;
   }
 
   private static Map<Suit, Integer> getSuitFrequencies(Set<Card> hand) {
@@ -142,6 +145,15 @@ public class PokerHandEvaluator {
           else frequencies.put(rank, frequencies.get(rank) + 1);
         });
     return frequencies;
+  }
+
+  private static boolean isStraight(Map<Rank, Integer> rankFrequencies) {
+    var ranks = rankFrequencies.keySet().stream().sorted().toList();
+    return ranks.get(4).getValue() - ranks.get(0).getValue() == 4;
+  }
+
+  private static List<Card> findCardsNotInRank(Set<Card> hand, List<Card> cardsInRank) {
+    return hand.stream().filter(card -> !cardsInRank.contains(card)).toList();
   }
 
   private PokerHandEvaluator() {}
