@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import org.codeshop.poker.card.Dealer;
 import org.codeshop.poker.card.Hand;
+import org.codeshop.poker.card.Ranking;
 import org.codeshop.poker.player.Player;
 
 class PokerRound {
@@ -30,22 +31,23 @@ class PokerRound {
     players.forEach(Player::rankHand);
   }
 
-  public Hand findBestHand() {
+  public Ranking findWinningRanking() {
     return players.stream()
         .map(Player::getHand)
         .max(Comparator.comparing(Hand::getRanking))
+        .map(Hand::getRanking)
         .orElse(null);
   }
 
-  public Player findWinningPlayer() {
-    var bestRanking = findBestHand().getRanking();
+  public List<Player> findWinningPlayers() {
+    var winningRanking = findWinningRanking();
     var contestingPlayers =
         players.stream()
-            .filter(player -> player.getHand().getRanking().equals(bestRanking))
+            .filter(player -> player.getHand().getRanking().equals(winningRanking))
             .toList();
-    if (contestingPlayers.size() == 1) return contestingPlayers.get(0);
+    if (contestingPlayers.size() == 1) return contestingPlayers;
     System.out.printf("Tie between %d players%n", contestingPlayers.size());
-    return tiebreaker.findTopPlayerInTie(contestingPlayers, bestRanking);
+    return tiebreaker.findWinnersInTie(contestingPlayers);
   }
 
   public void disposePlayedCards() {

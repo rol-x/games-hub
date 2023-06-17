@@ -20,8 +20,9 @@ public class Dealer {
   }
 
   private LinkedList<Card> shuffle(LinkedList<Card> cards) {
+    var deckSize = cards.size();
     for (int i = 0; i < 1000; i++) {
-      cards.add(random.nextInt(52), cards.remove(random.nextInt(52)));
+      cards.add(random.nextInt(deckSize), cards.remove(random.nextInt(deckSize)));
     }
     return cards;
   }

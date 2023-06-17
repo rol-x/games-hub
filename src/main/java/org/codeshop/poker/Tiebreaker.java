@@ -1,50 +1,64 @@
 package org.codeshop.poker;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import org.codeshop.poker.card.Ranking;
+import org.codeshop.poker.card.Rank;
 import org.codeshop.poker.player.Player;
 
 public class Tiebreaker {
-  public Player findTopPlayerInTie(List<Player> contestingPlayers, Ranking bestRanking) {
-    Player winner;
-    switch (bestRanking) {
-      case HIGH_CARD -> winner = tieBreakHighCard(contestingPlayers);
-      case PAIR -> winner = tieBreakPair(contestingPlayers);
-      case TWO_PAIR -> winner = tieBreakTwoPairs(contestingPlayers);
-      case THREE_OF_A_KIND -> winner = tieBreakThreeOfAKind(contestingPlayers);
-      case STRAIGHT, STRAIGHT_FLUSH -> winner = tieBreakStraight(contestingPlayers);
-      case FULL_HOUSE -> winner = tieBreakFullHouse(contestingPlayers);
-      case FOUR_OF_A_KIND -> winner = tieBreakFourOfAKind(contestingPlayers);
-      default -> winner = null;
+  public List<Player> findWinnersInTie(List<Player> contestingPlayers) {
+    var remainingContenders = new ArrayList<>(contestingPlayers);
+    compareCardsInRankAndEliminate(remainingContenders);
+    if (remainingContenders.size() == 1) return remainingContenders;
+
+    compareOtherCardsAndEliminate(remainingContenders);
+    return remainingContenders;
+  }
+
+  private void compareCardsInRankAndEliminate(ArrayList<Player> remainingContenders) {
+    for (int i = 0; i < remainingContenders.get(0).getHand().getCardsInRank().size(); i++) {
+      var comparedCardPosition = i;
+      var topRank =
+          remainingContenders.stream()
+              .map(player -> player.getHand().getCardsInRank().get(comparedCardPosition).getRank())
+              .max(Comparator.comparing(Rank::getValue))
+              .orElseThrow();
+      remainingContenders.removeAll(
+          remainingContenders.stream()
+              .filter(
+                  player ->
+                      !player
+                          .getHand()
+                          .getCardsInRank()
+                          .get(comparedCardPosition)
+                          .getRank()
+                          .equals(topRank))
+              .toList());
+      if (remainingContenders.size() == 1) return;
     }
-    return winner;
   }
 
-  private Player tieBreakFourOfAKind(List<Player> contestingPlayers) {
-    return contestingPlayers.get(0);
-  }
-
-  private Player tieBreakFullHouse(List<Player> contestingPlayers) {
-    return contestingPlayers.get(0);
-  }
-
-  private Player tieBreakStraight(List<Player> contestingPlayers) {
-    return contestingPlayers.get(0);
-  }
-
-  private Player tieBreakThreeOfAKind(List<Player> contestingPlayers) {
-    return contestingPlayers.get(0);
-  }
-
-  private Player tieBreakTwoPairs(List<Player> contestingPlayers) {
-    return contestingPlayers.get(0);
-  }
-
-  private Player tieBreakHighCard(List<Player> contestingPlayers) {
-    return contestingPlayers.get(0);
-  }
-
-  private Player tieBreakPair(List<Player> contestingPlayers) {
-    return contestingPlayers.get(0);
+  private void compareOtherCardsAndEliminate(ArrayList<Player> remainingContenders) {
+    for (int i = 0; i < remainingContenders.get(0).getHand().getOtherCards().size(); i++) {
+      var comparedCardPosition = i;
+      var topRank =
+          remainingContenders.stream()
+              .map(player -> player.getHand().getOtherCards().get(comparedCardPosition).getRank())
+              .max(Comparator.comparing(Rank::getValue))
+              .orElseThrow();
+      remainingContenders.removeAll(
+          remainingContenders.stream()
+              .filter(
+                  player ->
+                      !player
+                          .getHand()
+                          .getOtherCards()
+                          .get(comparedCardPosition)
+                          .getRank()
+                          .equals(topRank))
+              .toList());
+      if (remainingContenders.size() == 1) return;
+    }
   }
 }

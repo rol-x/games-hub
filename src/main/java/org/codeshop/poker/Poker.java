@@ -23,13 +23,13 @@ public class Poker {
       round.dealHandToEachPlayer();
       round.rankEachHand();
       round.displayEachPlayersHand();
-      var winningHand = round.findBestHand();
-      System.out.println("Winning hand: " + winningHand);
-      allRankings.add(winningHand.getRanking());
+      var winningRanking = round.findWinningRanking();
+      System.out.println("Winning ranking: " + winningRanking);
+      allRankings.add(winningRanking);
 
-      var winner = round.findWinningPlayer();
-      winner.win(100);
-      System.out.println("Winner: " + winner);
+      var winners = round.findWinningPlayers();
+      winners.forEach(winner -> winner.win(100));
+      System.out.println("Winners: " + winners);
       round.disposePlayedCards();
       roundCount += 1;
       if (roundCount >= ROUNDS_LIMIT) alive = false;
@@ -56,7 +56,7 @@ public class Poker {
       var round = new PokerRound(List.of(new ComputerPlayer("Steven")));
       round.dealHandToEachPlayer();
       round.rankEachHand();
-      var ranking = round.findBestHand().getRanking();
+      var ranking = round.findWinningRanking();
 
       if (rankingsFrequency.containsKey(ranking))
         rankingsFrequency.put(ranking, rankingsFrequency.get(ranking) + 1);
