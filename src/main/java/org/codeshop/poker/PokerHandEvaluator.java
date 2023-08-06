@@ -1,4 +1,4 @@
-package org.codeshop.poker.player;
+package org.codeshop.poker;
 
 import java.util.Collections;
 import java.util.Comparator;

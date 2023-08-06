@@ -1,10 +1,10 @@
 package org.codeshop;
 
-import org.codeshop.poker.Poker;
+import org.codeshop.poker.PokerGame;
 
 public class Main {
   public static void main(String[] args) {
-    var poker = new Poker();
+    var poker = new PokerGame();
     poker.addComputerPlayer("Stephen");
     poker.addComputerPlayer("Maria");
     poker.addHumanPlayer("Charles");
