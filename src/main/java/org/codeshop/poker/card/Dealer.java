@@ -1,30 +1,22 @@
 package org.codeshop.poker.card;
 
+import java.util.Collections;
 import java.util.LinkedList;
-import java.util.Random;
 
 public class Dealer {
-  private LinkedList<Card> deck;
-  private final Random random = new Random();
+  private final LinkedList<Card> deck;
 
   public Dealer() {
-    deck = shuffle(createOrderedDeck());
+    deck = createOrderedDeck();
+    Collections.shuffle(deck);
   }
 
   public Card dealCard() {
     if (deck.isEmpty()) {
-      System.out.println("Shuffling new deck...");
-      deck = shuffle(createOrderedDeck());
+      System.out.println("The game cannot continue because the deck has ended.");
+      System.exit(0);
     }
     return deck.pop();
-  }
-
-  private LinkedList<Card> shuffle(LinkedList<Card> cards) {
-    var deckSize = cards.size();
-    for (int i = 0; i < 1000; i++) {
-      cards.add(random.nextInt(deckSize), cards.remove(random.nextInt(deckSize)));
-    }
-    return cards;
   }
 
   private static LinkedList<Card> createOrderedDeck() {
