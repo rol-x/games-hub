@@ -6,38 +6,64 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import org.codeshop.poker.card.Ranking;
+import org.codeshop.poker.io.ConsoleIOHandler;
+import org.codeshop.poker.io.IOHandler;
 import org.codeshop.poker.player.ComputerPlayer;
 import org.codeshop.poker.player.HumanPlayer;
 import org.codeshop.poker.player.Player;
 
-public class Poker {
-  public static final int ROUNDS_LIMIT = 200;
+public class PokerGame {
   private final List<Player> players = new ArrayList<>();
+  private final IOHandler ioHandler = new ConsoleIOHandler();
 
   public void play() {
-    boolean alive = true;
-    List<Ranking> allRankings = new ArrayList<>();
-    int roundCount = 0;
-    do {
+    shufflePlayers();
+    var humanPlayers = players.stream().filter(HumanPlayer.class::isInstance).toList();
+    var computerPlayers = players.stream().filter(ComputerPlayer.class::isInstance).toList();
+    int ante = 20;
+    while (true) {
       var round = new PokerRound(players);
-      round.dealHandToEachPlayer();
-      round.rankEachHand();
-      round.displayEachPlayersHand();
-      var winningRanking = round.findWinningRanking();
-      System.out.println("Winning ranking: " + winningRanking);
-      allRankings.add(winningRanking);
 
-      var winners = round.findWinningPlayers();
-      winners.forEach(winner -> winner.win(100));
-      System.out.println("Winners: " + winners);
+      // Initial Bets (Ante):
+      // Each player places an initial bet into the pot. This is known as the "ante".
+      ioHandler.acceptAnte(humanPlayers, ante);
+      round.collectAnteFromPlayers(ante);
+
+      // Deal the Cards:
+      // Deal five cards to each player.
+      round.dealHandToEachPlayer();
+      ioHandler.displayComputerPlayersHands(computerPlayers);
+      ioHandler.displayHumanPlayersHands(humanPlayers);
+
+      // First Betting Round:
+      // Each player has the opportunity to "check", "bet", "fold", "call", or "raise".
+      round.startFirstBettingRound();
+
+      // Draw Phase:
+      // Each player chooses how many cards to discard and replace (draw) from the deck (0-5).
+      round.startDrawPhase();
+
+      // Second Betting Round:
+      // Another round of betting ensues, starting again with the player to the left of the dealer.
+      round.startSecondBettingRound();
+
+      // Showdown:
+      // If two or more players remain after the second betting round, there is a showdown.
+      // Players show their hands, and the player with the best hand wins the pot.
+      // If there is a tie, the pot is split equally among the winning players.
+      round.startShowdown();
+
+      // Next Round:
+      // The cards from players' hands are disposed, the deck is shuffled, and a new round begins.
       round.disposePlayedCards();
-      roundCount += 1;
-      if (roundCount >= ROUNDS_LIMIT) alive = false;
-      System.out.println();
-    } while (alive);
-    printStatisticsAfterGame(allRankings, roundCount);
+
+      // Game over:
+      // The game is finished when no human players have any money left.
+      if (humanPlayers.stream().allMatch(Player::isBankrupt)) break;
+    }
   }
 
+  @SuppressWarnings("unused")
   private static void printStatisticsAfterGame(List<Ranking> allRankings, int roundCount) {
     System.out.println("Rounds played: " + roundCount);
     var rankOccurrences = new StringBuilder();
@@ -48,6 +74,7 @@ public class Poker {
     System.out.println(rankOccurrences);
   }
 
+  @SuppressWarnings("unused")
   public static void simulateHandDealsAndReportStatistics(int numberOfHandDeals) {
     System.out.println("Simulation running...");
     Map<Ranking, Integer> rankingsFrequency = new EnumMap<>(Ranking.class);
@@ -55,7 +82,6 @@ public class Poker {
     do {
       var round = new PokerRound(List.of(new ComputerPlayer("Steven")));
       round.dealHandToEachPlayer();
-      round.rankEachHand();
       var ranking = round.findWinningRanking();
 
       if (rankingsFrequency.containsKey(ranking))
@@ -81,5 +107,9 @@ public class Poker {
   public void addComputerPlayer(String name) {
     var player = new ComputerPlayer(name);
     players.add(player);
+  }
+
+  private void shufflePlayers() {
+    Collections.shuffle(players);
   }
 }

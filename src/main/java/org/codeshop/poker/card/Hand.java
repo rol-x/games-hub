@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.Getter;
-import org.codeshop.poker.player.PokerHandEvaluator;
+import org.codeshop.poker.PokerHandEvaluator;
 
 @Getter
 public class Hand {
@@ -12,6 +12,7 @@ public class Hand {
   private Ranking ranking;
   private List<Card> cardsInRank;
   private List<Card> otherCards;
+  private boolean folded;
 
   public void add(Card card) {
     this.cards.add(card);
@@ -22,6 +23,14 @@ public class Hand {
     this.ranking = rankedHand.ranking();
     this.cardsInRank = rankedHand.cardsInRank();
     this.otherCards = rankedHand.otherCards();
+  }
+
+  public void fold() {
+    this.folded = true;
+  }
+
+  public boolean isFolded() {
+    return folded;
   }
 
   @Override
