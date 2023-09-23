@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import org.codeshop.poker.bet.BettingDecision;
 import org.codeshop.poker.bet.BettingInfo;
+import org.codeshop.poker.card.Card;
 import org.codeshop.poker.card.Dealer;
 import org.codeshop.poker.card.Hand;
 import org.codeshop.poker.card.Ranking;
@@ -64,7 +65,7 @@ public class PokerRound {
     this.pot += players.size() * ante;
   }
 
-  public void startFirstBettingRound() {
+  public void playFirstBettingRound() {
     // Check: If no bet has been made in the current betting round, a player may pass on betting
     // by choosing to "check". If all active players check, the round is considered complete.
     // Bet: If no bet has been made, a player can choose to "bet" and wager a certain amount of
@@ -134,11 +135,28 @@ public class PokerRound {
     players.removeAll(players.stream().filter(Player::isBankrupt).toList());
   }
 
-  public void startDrawPhase() {}
+  public void enterDrawPhase() {
+    for (var player : getPlayersInGame()) {
+      List<Card> cardsToExchange;
+      if (player instanceof ComputerPlayer computerPlayer) {
+        cardsToExchange = computerPlayer.chooseCardsToExchange();
+      } else {
+        cardsToExchange = ioHandler.readCardsToExchange(player);
+      }
+      player.disposeCardsToExchange(cardsToExchange);
+      for (var __ : cardsToExchange) {
+        var card = dealer.dealCard();
+        player.takeCard(card);
+      }
+      player.getHand().rankCards();
+    }
+  }
 
-  public void startSecondBettingRound() {}
+  public void playSecondBettingRound() {
+    playFirstBettingRound();
+  }
 
-  public void startShowdown() {
+  public void enterShowdown() {
     var winners = findWinningPlayers();
     winners.forEach(winner -> winner.win(pot / winners.size()));
     System.out.println("Winners: " + winners);

@@ -15,18 +15,23 @@ public class Hand {
   private boolean folded;
 
   public void add(Card card) {
-    this.cards.add(card);
+    cards.add(card);
+  }
+
+  public void removeCards(List<Card> cards) {
+    this.cards.removeAll(cards);
+    rankCards();
   }
 
   public void rankCards() {
     var rankedHand = PokerHandEvaluator.evaluate(cards);
-    this.ranking = rankedHand.ranking();
-    this.cardsInRank = rankedHand.cardsInRank();
-    this.otherCards = rankedHand.otherCards();
+    ranking = rankedHand.ranking();
+    cardsInRank = rankedHand.cardsInRank();
+    otherCards = rankedHand.otherCards();
   }
 
   public void fold() {
-    this.folded = true;
+    folded = true;
   }
 
   public boolean isFolded() {

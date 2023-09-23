@@ -1,10 +1,15 @@
 package org.codeshop.poker.io;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.IntStream;
 import org.codeshop.poker.bet.BettingAction;
 import org.codeshop.poker.bet.BettingDecision;
 import org.codeshop.poker.bet.BettingInfo;
+import org.codeshop.poker.card.Card;
 import org.codeshop.poker.player.Player;
 
 public class ConsoleIOHandler implements IOHandler {
@@ -44,20 +49,18 @@ public class ConsoleIOHandler implements IOHandler {
 
   @Override
   public void displayComputerPlayersHands(List<Player> computerPlayers) {
-    computerPlayers.forEach(
-        player ->
-            System.out.printf(
-                "%s\t[%s]%nBet: $%d  (Total: $%d)%n%n",
-                player, player.getHand().getRanking(), player.getCurrentBid(), player.getMoney()));
+    computerPlayers.forEach(this::displayHumanPlayerHand);
   }
 
   @Override
   public void displayHumanPlayersHands(List<Player> humanPlayers) {
-    humanPlayers.forEach(
-        player ->
-            System.out.printf(
-                "%s\t[%s]%nBet: $%d  (Total: $%d)%n%n",
-                player, player.getHand().getRanking(), player.getCurrentBid(), player.getMoney()));
+    humanPlayers.forEach(this::displayHumanPlayerHand);
+  }
+
+  private void displayHumanPlayerHand(Player player) {
+    System.out.printf(
+        "%s\t[%s]%nBet: $%d  (Total: $%d)%n%n",
+        player, player.getHand().getRanking(), player.getCurrentBid(), player.getMoney());
   }
 
   @Override
@@ -120,5 +123,41 @@ public class ConsoleIOHandler implements IOHandler {
       case BET -> writeLine("%s bets $%d.".formatted(name, decision.newBid()));
       case RAISE -> writeLine("%s raises to $%d.".formatted(name, decision.newBid()));
     }
+  }
+
+  @Override
+  public List<Card> readCardsToExchange(Player player) {
+    String key;
+    Map<Card, Boolean> toExchange = new HashMap<>();
+    player.getHand().getCardsInRank().forEach(card -> toExchange.put(card, false));
+    player.getHand().getOtherCards().forEach(card -> toExchange.put(card, false));
+    var hand =
+        toExchange.keySet().stream()
+            .sorted(Comparator.comparing(Card::getRank).reversed())
+            .toList();
+    do {
+      displayHumanPlayerHand(player);
+      writeLine("Which cards to exchange?");
+      IntStream.range(0, toExchange.size())
+          .forEach(
+              i ->
+                  writeLine(
+                      "[%d] %s (%s)"
+                          .formatted(
+                              i + 1,
+                              hand.get(i),
+                              Boolean.TRUE.equals(toExchange.get(hand.get(i))) ? "X" : " ")));
+      writeLine("");
+      writeLine("[A] Accept");
+      key = readKey("12345A");
+      if (!key.equalsIgnoreCase("a")) {
+        var pickedCard = hand.get(Integer.parseInt(key) - 1);
+        toExchange.put(pickedCard, !toExchange.get(pickedCard));
+      }
+    } while (!key.equalsIgnoreCase("a"));
+    return toExchange.entrySet().stream()
+        .filter(Map.Entry::getValue)
+        .map(Map.Entry::getKey)
+        .toList();
   }
 }

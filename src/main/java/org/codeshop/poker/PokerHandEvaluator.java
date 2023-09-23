@@ -149,6 +149,7 @@ public class PokerHandEvaluator {
 
   private static boolean isStraight(Map<Rank, Integer> rankFrequencies) {
     var ranks = rankFrequencies.keySet().stream().sorted().toList();
+    if (rankFrequencies.values().stream().reduce(Integer::sum).orElse(0) < 5) return false;
     return ranks.get(4).getValue() - ranks.get(0).getValue() == 4;
   }
 

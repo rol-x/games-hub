@@ -37,21 +37,22 @@ public class PokerGame {
 
       // First Betting Round:
       // Each player has the opportunity to "check", "bet", "fold", "call", or "raise".
-      round.startFirstBettingRound();
+      round.playFirstBettingRound();
 
       // Draw Phase:
       // Each player chooses how many cards to discard and replace (draw) from the deck (0-5).
-      round.startDrawPhase();
+      round.enterDrawPhase();
+      ioHandler.displayHumanPlayersHands(humanPlayers);
 
       // Second Betting Round:
       // Another round of betting ensues, starting again with the player to the left of the dealer.
-      round.startSecondBettingRound();
+      round.playSecondBettingRound();
 
       // Showdown:
       // If two or more players remain after the second betting round, there is a showdown.
       // Players show their hands, and the player with the best hand wins the pot.
       // If there is a tie, the pot is split equally among the winning players.
-      round.startShowdown();
+      round.enterShowdown();
 
       // Next Round:
       // The cards from players' hands are disposed, the deck is shuffled, and a new round begins.

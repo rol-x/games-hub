@@ -1,5 +1,6 @@
 package org.codeshop.poker.player;
 
+import java.util.List;
 import lombok.Getter;
 import org.codeshop.poker.bet.BettingAction;
 import org.codeshop.poker.bet.BettingDecision;
@@ -17,42 +18,42 @@ public abstract class Player {
 
   protected Player(String name) {
     this.name = name;
-    this.money = 1000;
-    this.hand = new Hand();
-    this.currentBid = 0;
+    money = 1000;
+    hand = new Hand();
+    currentBid = 0;
   }
 
   public void takeCard(Card card) {
-    this.hand.add(card);
+    hand.add(card);
   }
 
   public void rankHand() {
-    this.hand.rankCards();
+    hand.rankCards();
   }
 
   public void disposeHand() {
-    this.hand = new Hand();
+    hand = new Hand();
   }
 
   public void win(int winAmount) {
-    this.money += winAmount;
+    money += winAmount;
   }
 
   public void ante(int ante) {
-    this.money -= ante;
+    money -= ante;
   }
 
   public void bet(int playerBet) {
-    this.money -= playerBet;
-    this.currentBid += playerBet;
+    money -= playerBet;
+    currentBid += playerBet;
   }
 
   public void resetCurrentBid() {
-    this.currentBid = 0;
+    currentBid = 0;
   }
 
   public boolean isBankrupt() {
-    return this.money <= 0;
+    return money <= 0;
   }
 
   @Override
@@ -88,5 +89,9 @@ public abstract class Player {
     // if you have bad hand, you will sometimes bluff but will fold/check in most cases
 
     // one strategy is taken or continued and amount is generated
+  }
+
+  public void disposeCardsToExchange(List<Card> cards) {
+    hand.removeCards(cards);
   }
 }
