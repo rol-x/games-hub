@@ -15,13 +15,15 @@ public interface IOHandler {
 
   void acceptAnte(List<Player> humanPlayers, int ante);
 
-  void displayComputerPlayersHands(List<Player> computerPlayers);
-
-  void displayHumanPlayersHands(List<Player> humanPlayers);
-
   BettingDecision getBettingDecision(BettingInfo bettingInfo);
 
   void writeBettingDecision(String name, BettingDecision decision);
 
   List<Card> readCardsToExchange(Player player);
+
+  void displayHandsMidGame(List<Player> players);
+
+  void displayHandsShowdown(List<Player> players);
+
+  void announceWinners(List<Player> winners);
 }

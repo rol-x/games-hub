@@ -40,12 +40,10 @@ public class Hand {
 
   @Override
   public String toString() {
-    var result = new StringBuilder(ranking.toString());
-    cardsInRank.forEach(card -> result.append(" ").append(card));
-    if (otherCards.isEmpty()) return result.toString();
-
-    result.append(" |");
-    otherCards.forEach(card -> result.append(" ").append(card));
-    return result.toString();
+    var result = new StringBuilder();
+    cardsInRank.forEach(card -> result.append(card).append(" "));
+    if (otherCards.isEmpty()) return result.toString().strip();
+    otherCards.forEach(card -> result.append(card).append(" "));
+    return result.toString().strip();
   }
 }

@@ -19,9 +19,8 @@ public class PokerGame {
   public void play() {
     shufflePlayers();
     var humanPlayers = players.stream().filter(HumanPlayer.class::isInstance).toList();
-    var computerPlayers = players.stream().filter(ComputerPlayer.class::isInstance).toList();
     int ante = 20;
-    while (true) {
+    do {
       var round = new PokerRound(players);
 
       // Initial Bets (Ante):
@@ -32,21 +31,20 @@ public class PokerGame {
       // Deal the Cards:
       // Deal five cards to each player.
       round.dealHandToEachPlayer();
-      ioHandler.displayComputerPlayersHands(computerPlayers);
-      ioHandler.displayHumanPlayersHands(humanPlayers);
+      ioHandler.displayHandsMidGame(players);
 
       // First Betting Round:
       // Each player has the opportunity to "check", "bet", "fold", "call", or "raise".
-      round.playFirstBettingRound();
+      round.playBettingRound();
 
       // Draw Phase:
       // Each player chooses how many cards to discard and replace (draw) from the deck (0-5).
       round.enterDrawPhase();
-      ioHandler.displayHumanPlayersHands(humanPlayers);
+      ioHandler.displayHandsMidGame(humanPlayers);
 
       // Second Betting Round:
       // Another round of betting ensues, starting again with the player to the left of the dealer.
-      round.playSecondBettingRound();
+      round.playBettingRound();
 
       // Showdown:
       // If two or more players remain after the second betting round, there is a showdown.
@@ -60,8 +58,7 @@ public class PokerGame {
 
       // Game over:
       // The game is finished when no human players have any money left.
-      if (humanPlayers.stream().allMatch(Player::isBankrupt)) break;
-    }
+    } while (!humanPlayers.stream().allMatch(Player::isBankrupt));
   }
 
   @SuppressWarnings("unused")

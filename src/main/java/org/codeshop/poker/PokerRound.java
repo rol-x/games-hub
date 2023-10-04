@@ -65,7 +65,7 @@ public class PokerRound {
     this.pot += players.size() * ante;
   }
 
-  public void playFirstBettingRound() {
+  public void playBettingRound() {
     // Check: If no bet has been made in the current betting round, a player may pass on betting
     // by choosing to "check". If all active players check, the round is considered complete.
     // Bet: If no bet has been made, a player can choose to "bet" and wager a certain amount of
@@ -91,8 +91,8 @@ public class PokerRound {
 
         BettingDecision decision;
         var bettingInfo = new BettingInfo(player.getMoney(), roundBid, player.getCurrentBid(), pot);
-        if (player instanceof ComputerPlayer) {
-          decision = player.makeBettingDecision(bettingInfo);
+        if (player instanceof ComputerPlayer computerPlayer) {
+          decision = computerPlayer.makeBettingDecision(bettingInfo);
         } else {
           decision = ioHandler.getBettingDecision(bettingInfo);
         }
@@ -121,7 +121,7 @@ public class PokerRound {
           }
           default -> {}
         }
-        ioHandler.writeLine("Bid: $%d\tPot: %d".formatted(roundBid, pot));
+        ioHandler.writeLine("Bid: $%d\tPot: $%d".formatted(roundBid, pot));
       }
     } while (!bettingFinished);
     players.forEach(Player::resetCurrentBid);
@@ -152,14 +152,11 @@ public class PokerRound {
     }
   }
 
-  public void playSecondBettingRound() {
-    playFirstBettingRound();
-  }
-
   public void enterShowdown() {
+    ioHandler.displayHandsShowdown(players);
     var winners = findWinningPlayers();
     winners.forEach(winner -> winner.win(pot / winners.size()));
-    System.out.println("Winners: " + winners);
+    ioHandler.announceWinners(winners);
   }
 
   public boolean areAllHumanPlayersBankrupt() {

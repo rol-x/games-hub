@@ -10,6 +10,7 @@ import org.codeshop.poker.bet.BettingAction;
 import org.codeshop.poker.bet.BettingDecision;
 import org.codeshop.poker.bet.BettingInfo;
 import org.codeshop.poker.card.Card;
+import org.codeshop.poker.player.ComputerPlayer;
 import org.codeshop.poker.player.Player;
 
 public class ConsoleIOHandler implements IOHandler {
@@ -36,10 +37,10 @@ public class ConsoleIOHandler implements IOHandler {
 
   @Override
   public void acceptAnte(List<Player> humanPlayers, int ante) {
-    writeLine("\n- New Round -");
+    writeLine("\n-- New Round --");
     writeLine("Ante: $%d%n".formatted(ante));
     for (var player : humanPlayers) {
-      writeLine(player.getName());
+      writeLine("%s\t($%d total)".formatted(player.getName(), player.getMoney()));
       writeLine("[A] Place ante");
       writeLine("[E] Exit game");
       var key = readKey("AE");
@@ -48,33 +49,15 @@ public class ConsoleIOHandler implements IOHandler {
   }
 
   @Override
-  public void displayComputerPlayersHands(List<Player> computerPlayers) {
-    computerPlayers.forEach(this::displayHumanPlayerHand);
-  }
-
-  @Override
-  public void displayHumanPlayersHands(List<Player> humanPlayers) {
-    humanPlayers.forEach(this::displayHumanPlayerHand);
-  }
-
-  private void displayHumanPlayerHand(Player player) {
-    System.out.printf(
-        "%s\t[%s]%nBet: $%d  (Total: $%d)%n%n",
-        player, player.getHand().getRanking(), player.getCurrentBid(), player.getMoney());
-  }
-
-  @Override
   public BettingDecision getBettingDecision(BettingInfo bettingInfo) {
     if (bettingInfo.roundBid() == 0) {
-      writeLine(
-          "%nYour money: $%d\tBid: $0\tPot: $0%n[C] Check%n[B] Bet%n[F] Fold"
-              .formatted(bettingInfo.playerMoney()));
+      writeLine("\n[C] Check\n[B] Bet\n[F] Fold");
       var key = readKey("CBF");
       if (key.equalsIgnoreCase("C")) {
         return new BettingDecision(BettingAction.CHECK, 0);
       }
       if (key.equalsIgnoreCase("B")) {
-        write("Your bet: ");
+        write("Place bet: $");
         var newBid = readMoney(bettingInfo.playerMoney(), 0);
         return new BettingDecision(BettingAction.BET, newBid);
       }
@@ -82,19 +65,13 @@ public class ConsoleIOHandler implements IOHandler {
         return new BettingDecision(BettingAction.FOLD, 0);
       }
     } else {
-      writeLine(
-          "%nYour money: $%d\tPot: $%d%nYour bid: $%d\tCurrent bid: $%d%n[C] Call%n[R] Raise%n[F] Fold"
-              .formatted(
-                  bettingInfo.playerMoney(),
-                  bettingInfo.pot(),
-                  bettingInfo.playerBid(),
-                  bettingInfo.roundBid()));
+      writeLine("\n[C] Call\n[R] Raise\n[F] Fold");
       var key = readKey("CRF");
       if (key.equalsIgnoreCase("C")) {
         return new BettingDecision(BettingAction.CALL, bettingInfo.roundBid());
       }
       if (key.equalsIgnoreCase("R")) {
-        write("Your bet: ");
+        write("Place bet: $");
         var newBid = readMoney(bettingInfo.playerMoney(), bettingInfo.roundBid());
         return new BettingDecision(BettingAction.RAISE, newBid);
       }
@@ -103,15 +80,6 @@ public class ConsoleIOHandler implements IOHandler {
       }
     }
     return new BettingDecision(BettingAction.CHECK, 0);
-  }
-
-  private int readMoney(int playerMoney, int roundBid) {
-    Scanner in = new Scanner(System.in);
-    int inputMoney;
-    do {
-      inputMoney = in.nextInt();
-    } while (inputMoney > playerMoney && inputMoney <= roundBid);
-    return inputMoney;
   }
 
   @Override
@@ -136,8 +104,7 @@ public class ConsoleIOHandler implements IOHandler {
             .sorted(Comparator.comparing(Card::getRank).reversed())
             .toList();
     do {
-      displayHumanPlayerHand(player);
-      writeLine("Which cards to exchange?");
+      writeLine("\nWhich cards to exchange?");
       IntStream.range(0, toExchange.size())
           .forEach(
               i ->
@@ -159,5 +126,55 @@ public class ConsoleIOHandler implements IOHandler {
         .filter(Map.Entry::getValue)
         .map(Map.Entry::getKey)
         .toList();
+  }
+
+  @Override
+  public void displayHandsMidGame(List<Player> players) {
+    players.forEach(
+        player -> {
+          if (player instanceof ComputerPlayer) {
+            System.out.printf(
+                "%s\t($%d bet | $%d total)%n█ █ █ █ █%n%n",
+                player.getName(), player.getCurrentBid(), player.getMoney());
+          } else {
+            System.out.printf(
+                "%s\t($%d bet | $%d total)%n%s%n%n",
+                player.getName(), player.getCurrentBid(), player.getMoney(), player.getHand());
+          }
+        });
+  }
+
+  @Override
+  public void displayHandsShowdown(List<Player> players) {
+    writeLine("");
+    players.forEach(
+        player ->
+            System.out.printf(
+                "%s\t($%d bet | $%d total)%n%s%n%n",
+                player.getName(), player.getCurrentBid(), player.getMoney(), player.getHand()));
+  }
+
+  @Override
+  public void announceWinners(List<Player> winners) {
+    var announcement = new StringBuilder("--== Winners ==--\n");
+    winners.forEach(
+        winner ->
+            announcement
+                .append(winner.getName())
+                .append(": ")
+                .append(winner.getHand().getRanking().toString().replace("_", " "))
+                .append(" ")
+                .append(winner.getHand().getCardsInRank())
+                .append("\t($%d)%n".formatted(winner.getMoney())));
+    System.out.println(announcement);
+  }
+
+  private int readMoney(int playerMoney, int roundBid) {
+    Scanner in = new Scanner(System.in);
+    int inputMoney;
+    do {
+      inputMoney = in.nextInt();
+    } while (inputMoney > playerMoney && inputMoney <= roundBid);
+    return inputMoney;
   }
 }
