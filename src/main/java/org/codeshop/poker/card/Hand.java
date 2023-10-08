@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.Getter;
-import org.codeshop.poker.PokerHandEvaluator;
+import org.codeshop.poker.tool.PokerHandEvaluator;
 
 @Getter
 public class Hand {

@@ -5,20 +5,34 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.codeshop.poker.card.Ranking;
-import org.codeshop.poker.io.ConsoleIOHandler;
 import org.codeshop.poker.io.IOHandler;
 import org.codeshop.poker.player.ComputerPlayer;
 import org.codeshop.poker.player.HumanPlayer;
 import org.codeshop.poker.player.Player;
 
+@RequiredArgsConstructor
 public class PokerGame {
+  public static final int INITIAL_ANTE = 20;
   private final List<Player> players = new ArrayList<>();
-  private final IOHandler ioHandler = new ConsoleIOHandler();
+  private final IOHandler ioHandler;
+  private int ante;
+
+  public void addHumanPlayer(String name) {
+    var player = new HumanPlayer(name);
+    players.add(player);
+  }
+
+  public void addComputerPlayer(String name) {
+    var player = new ComputerPlayer(name);
+    players.add(player);
+  }
 
   public void play() {
     shufflePlayers();
-    int ante = 20;
+    ante = INITIAL_ANTE;
+    int roundCount = 1;
     do {
       var round = new PokerRound(players);
       var humanPlayers = players.stream().filter(HumanPlayer.class::isInstance).toList();
@@ -59,6 +73,7 @@ public class PokerGame {
 
       // Game over:
       // The game is finished when only one player is left with the money.
+      roundCount++;
     } while (players.stream().filter(player -> !player.isBankrupt()).count() > 1);
     ioHandler.showWinner(
         players.stream().filter(player -> !player.isBankrupt()).findFirst().orElseThrow());
@@ -67,20 +82,11 @@ public class PokerGame {
   private void removeBankruptPlayers() {
     var bankruptPlayers = players.stream().filter(Player::isBankrupt).toList();
     bankruptPlayers.forEach(
-        player ->
-            ioHandler.writeLine("%s went bankrupt and left the game.".formatted(player.getName())));
+        player -> {
+          ante *= 2;
+          ioHandler.writeLine("%s went bankrupt and left the game.".formatted(player.getName()));
+        });
     players.removeAll(bankruptPlayers);
-  }
-
-  @SuppressWarnings("unused")
-  private static void printStatisticsAfterGame(List<Ranking> allRankings, int roundCount) {
-    System.out.println("Rounds played: " + roundCount);
-    var rankOccurrences = new StringBuilder();
-    for (var ranking : Ranking.values())
-      if (Collections.frequency(allRankings, ranking) > 0)
-        rankOccurrences.append(
-            "%s: %d%n".formatted(ranking, Collections.frequency(allRankings, ranking)));
-    System.out.println(rankOccurrences);
   }
 
   @SuppressWarnings("unused")
@@ -106,16 +112,6 @@ public class PokerGame {
         (ranking, frequency) ->
             System.out.printf(
                 "%s: %d (%.2f%%)%n", ranking, frequency, 100f * frequency / totalRoundCount));
-  }
-
-  public void addHumanPlayer(String name) {
-    var player = new HumanPlayer(name);
-    players.add(player);
-  }
-
-  public void addComputerPlayer(String name) {
-    var player = new ComputerPlayer(name);
-    players.add(player);
   }
 
   private void shufflePlayers() {

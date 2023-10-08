@@ -1,4 +1,4 @@
-package org.codeshop.poker;
+package org.codeshop.poker.tool;
 
 import java.util.ArrayList;
 import java.util.Comparator;
