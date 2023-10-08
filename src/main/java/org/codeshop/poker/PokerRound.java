@@ -11,7 +11,6 @@ import org.codeshop.poker.card.Ranking;
 import org.codeshop.poker.io.ConsoleIOHandler;
 import org.codeshop.poker.io.IOHandler;
 import org.codeshop.poker.player.ComputerPlayer;
-import org.codeshop.poker.player.HumanPlayer;
 import org.codeshop.poker.player.Player;
 import org.codeshop.poker.tool.Tiebreaker;
 
@@ -157,9 +156,5 @@ public class PokerRound {
     var winners = findWinningPlayers();
     winners.forEach(winner -> winner.win(pot / winners.size()));
     ioHandler.announceWinners(winners);
-  }
-
-  public boolean areAllHumanPlayersBankrupt() {
-    return players.stream().filter(HumanPlayer.class::isInstance).allMatch(Player::isBankrupt);
   }
 }
