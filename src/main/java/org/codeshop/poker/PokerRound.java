@@ -119,7 +119,7 @@ public class PokerRound {
             player.bet(playerBet);
             pot += playerBet;
           }
-          default -> {}
+          default -> throw new UnsupportedOperationException();
         }
         ioHandler.writeLine("Bid: $%d\tPot: $%d".formatted(roundBid, pot));
       }
@@ -140,10 +140,10 @@ public class PokerRound {
       } else {
         cardsToExchange = ioHandler.readCardsToExchange(player);
       }
-      player.disposeCardsToExchange(cardsToExchange);
-      for (var __ : cardsToExchange) {
-        var card = dealer.dealCard();
-        player.takeCard(card);
+      for (var card : cardsToExchange) {
+        player.disposeCard(card);
+        var newCard = dealer.dealCard();
+        player.takeCard(newCard);
       }
       player.getHand().rankCards();
       ioHandler.writeLine(

@@ -1,6 +1,5 @@
 package org.codeshop.poker.player;
 
-import java.util.List;
 import lombok.Getter;
 import org.codeshop.poker.card.Card;
 import org.codeshop.poker.card.Hand;
@@ -53,6 +52,10 @@ public abstract class Player {
     return money <= 0;
   }
 
+  public void disposeCard(Card card) {
+    hand.removeCard(card);
+  }
+
   @Override
   public String toString() {
     var result = new StringBuilder(name);
@@ -66,9 +69,5 @@ public abstract class Player {
     result.deleteCharAt(result.length() - 1);
     result.append("]");
     return result.toString();
-  }
-
-  public void disposeCardsToExchange(List<Card> cards) {
-    hand.removeCards(cards);
   }
 }

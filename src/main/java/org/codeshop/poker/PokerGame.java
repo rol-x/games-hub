@@ -32,7 +32,6 @@ public class PokerGame {
   public void play() {
     shufflePlayers();
     ante = INITIAL_ANTE;
-    int roundCount = 1;
     do {
       var round = new PokerRound(players);
       var humanPlayers = players.stream().filter(HumanPlayer.class::isInstance).toList();
@@ -73,7 +72,6 @@ public class PokerGame {
 
       // Game over:
       // The game is finished when only one player is left with the money.
-      roundCount++;
     } while (players.stream().filter(player -> !player.isBankrupt()).count() > 1);
     ioHandler.showWinner(
         players.stream().filter(player -> !player.isBankrupt()).findFirst().orElseThrow());

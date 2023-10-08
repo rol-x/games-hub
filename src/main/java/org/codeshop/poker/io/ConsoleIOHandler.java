@@ -14,25 +14,10 @@ import org.codeshop.poker.player.ComputerPlayer;
 import org.codeshop.poker.player.Player;
 
 public class ConsoleIOHandler implements IOHandler {
-  @Override
-  public void write(String message) {
-    System.out.print(message);
-  }
 
   @Override
   public void writeLine(String message) {
     System.out.println(message);
-  }
-
-  @Override
-  public String readKey(String possibleKeys) {
-    Scanner in = new Scanner(System.in);
-    String key;
-    do {
-      key = String.valueOf(in.next());
-    } while (!possibleKeys.toLowerCase().contains((key))
-        && !possibleKeys.toUpperCase().contains((key)));
-    return key;
   }
 
   @Override
@@ -57,7 +42,7 @@ public class ConsoleIOHandler implements IOHandler {
         return new BettingDecision(BettingAction.CHECK, 0);
       }
       if (key.equalsIgnoreCase("B")) {
-        write("Place bet: $");
+        System.out.print("Place bet: $");
         var newBid = readMoney(bettingInfo.playerMoney(), 0);
         return new BettingDecision(BettingAction.BET, newBid);
       }
@@ -71,7 +56,7 @@ public class ConsoleIOHandler implements IOHandler {
         return new BettingDecision(BettingAction.CALL, bettingInfo.roundBid());
       }
       if (key.equalsIgnoreCase("R")) {
-        write("Place bet: $");
+        System.out.print("Place bet: $");
         var newBid = readMoney(bettingInfo.playerMoney(), bettingInfo.roundBid());
         return new BettingDecision(BettingAction.RAISE, newBid);
       }
@@ -179,6 +164,16 @@ public class ConsoleIOHandler implements IOHandler {
     writeLine(
         "Congratulations to %s for winning the game with $%d!"
             .formatted(winner.getName(), winner.getMoney()));
+  }
+
+  private String readKey(String possibleKeys) {
+    Scanner in = new Scanner(System.in);
+    String key;
+    do {
+      key = String.valueOf(in.next());
+    } while (!possibleKeys.toLowerCase().contains((key))
+        && !possibleKeys.toUpperCase().contains((key)));
+    return key;
   }
 
   private int readMoney(int playerMoney, int roundBid) {
