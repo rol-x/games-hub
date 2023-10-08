@@ -131,11 +131,8 @@ public class PokerRound {
     return players.stream().filter(player -> !player.getHand().isFolded()).toList();
   }
 
-  private void removeBankruptPlayers() {
-    players.removeAll(players.stream().filter(Player::isBankrupt).toList());
-  }
-
   public void enterDrawPhase() {
+    ioHandler.writeLine("");
     for (var player : getPlayersInGame()) {
       List<Card> cardsToExchange;
       if (player instanceof ComputerPlayer computerPlayer) {
@@ -149,6 +146,8 @@ public class PokerRound {
         player.takeCard(card);
       }
       player.getHand().rankCards();
+      ioHandler.writeLine(
+          "%s exchanged %d cards.".formatted(player.getName(), cardsToExchange.size()));
     }
   }
 

@@ -26,4 +26,6 @@ public interface IOHandler {
   void displayHandsShowdown(List<Player> players);
 
   void announceWinners(List<Player> winners);
+
+  void showWinner(Player winner);
 }

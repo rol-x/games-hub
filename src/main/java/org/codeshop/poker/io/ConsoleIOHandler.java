@@ -130,6 +130,7 @@ public class ConsoleIOHandler implements IOHandler {
 
   @Override
   public void displayHandsMidGame(List<Player> players) {
+    writeLine("");
     players.forEach(
         player -> {
           if (player instanceof ComputerPlayer) {
@@ -150,8 +151,12 @@ public class ConsoleIOHandler implements IOHandler {
     players.forEach(
         player ->
             System.out.printf(
-                "%s\t($%d bet | $%d total)%n%s%n%n",
-                player.getName(), player.getCurrentBid(), player.getMoney(), player.getHand()));
+                "%s\t($%d bet | $%d total)%n%s (%s)%n%n",
+                player.getName(),
+                player.getCurrentBid(),
+                player.getMoney(),
+                player.getHand(),
+                player.getHand().getRanking()));
   }
 
   @Override
@@ -167,6 +172,13 @@ public class ConsoleIOHandler implements IOHandler {
                 .append(winner.getHand().getCardsInRank())
                 .append("\t($%d)%n".formatted(winner.getMoney())));
     System.out.println(announcement);
+  }
+
+  @Override
+  public void showWinner(Player winner) {
+    writeLine(
+        "Congratulations to %s for winning the game with $%d!"
+            .formatted(winner.getName(), winner.getMoney()));
   }
 
   private int readMoney(int playerMoney, int roundBid) {

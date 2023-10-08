@@ -18,10 +18,10 @@ public class PokerGame {
 
   public void play() {
     shufflePlayers();
-    var humanPlayers = players.stream().filter(HumanPlayer.class::isInstance).toList();
     int ante = 20;
     do {
       var round = new PokerRound(players);
+      var humanPlayers = players.stream().filter(HumanPlayer.class::isInstance).toList();
 
       // Initial Bets (Ante):
       // Each player places an initial bet into the pot. This is known as the "ante".
@@ -55,10 +55,21 @@ public class PokerGame {
       // Next Round:
       // The cards from players' hands are disposed, the deck is shuffled, and a new round begins.
       round.disposePlayedCards();
+      removeBankruptPlayers();
 
       // Game over:
-      // The game is finished when no human players have any money left.
-    } while (!humanPlayers.stream().allMatch(Player::isBankrupt));
+      // The game is finished when only one player is left with the money.
+    } while (players.stream().filter(player -> !player.isBankrupt()).count() > 1);
+    ioHandler.showWinner(
+        players.stream().filter(player -> !player.isBankrupt()).findFirst().orElseThrow());
+  }
+
+  private void removeBankruptPlayers() {
+    var bankruptPlayers = players.stream().filter(Player::isBankrupt).toList();
+    bankruptPlayers.forEach(
+        player ->
+            ioHandler.writeLine("%s went bankrupt and left the game.".formatted(player.getName())));
+    players.removeAll(bankruptPlayers);
   }
 
   @SuppressWarnings("unused")

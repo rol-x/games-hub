@@ -20,7 +20,8 @@ public class Hand {
 
   public void removeCards(List<Card> cards) {
     this.cards.removeAll(cards);
-    rankCards();
+    if (!this.cards.isEmpty()) rankCards();
+    else ranking = null;
   }
 
   public void rankCards() {
